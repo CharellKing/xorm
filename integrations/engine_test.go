@@ -16,11 +16,13 @@ import (
 
 	_ "github.com/denisenkom/go-mssqldb"
 	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/godror/godror"
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/stretchr/testify/assert"
 	_ "github.com/ziutek/mymysql/godrv"
 	_ "modernc.org/sqlite"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestPing(t *testing.T) {
