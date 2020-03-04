@@ -337,6 +337,10 @@ func (session *Session) innerInsert(bean interface{}) (int64, error) {
 	if len(table.AutoIncrement) > 0 && !session.engine.driver.Features().SupportReturnInsertedID {
 		var sql = sqlStr
 		if session.engine.dialect.URI().DBType == schemas.ORACLE {
+			_, err := session.exec(sqlStr, args...)
+			if err != nil {
+				return 0, err
+			}
 			sql = "select seq_atable.currval from dual"
 		}
 
