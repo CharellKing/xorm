@@ -104,7 +104,7 @@ func (db *Base) URI() *URI {
 }
 
 // DropTableSQL returns drop table SQL
-func (db *Base) DropTableSQL(tableName, autoincrCol string) (string, bool) {
+func (db *Base) DropTableSQL(tableName, autoincrCol string) ([]string, bool) {
 	quote := db.dialect.Quoter().Quote
 	return []string{fmt.Sprintf("DROP TABLE IF EXISTS %s", quote(tableName))}, true
 }

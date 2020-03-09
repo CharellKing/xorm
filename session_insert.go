@@ -150,6 +150,13 @@ func (session *Session) innerInsertMulti(rowsSlicePtr interface{}) (int64, error
 			}
 			fieldValue := *ptrFieldValue
 			if col.IsAutoIncrement && utils.IsZero(fieldValue.Interface()) {
+				if session.engine.dialect.URI().DBType == schemas.ORACLE {
+					if i == 0 {
+						colNames = append(colNames, col.Name)
+						cols = append(cols, col)
+					}
+					colPlaces = append(colPlaces, "seq_"+tableName+".nextval")
+				}
 				continue
 			}
 			if col.MapType == schemas.ONLYFROMDB {
@@ -513,10 +520,14 @@ func (session *Session) genInsertColumns(bean interface{}) ([]string, []interfac
 			}
 		}
 
-		if (col.IsCreated || col.IsUpdated) && session.statement.UseAutoTime /*&& isZero(fieldValue.Interface())*/ {
+		if (col.IsCreated || col.IsUpdated) && session.statement.UseAutoTime {
 			// if time is non-empty, then set to auto time
 			val, t := session.engine.nowTime(col)
-			args = append(args, val)
+			if session.engine.dialect.URI().DBType == schemas.ORACLE {
+				args = append(args, t)
+			} else {
+				args = append(args, val)
+			}
 
 			var colName = col.Name
 			session.afterClosures = append(session.afterClosures, func(bean interface{}) {
