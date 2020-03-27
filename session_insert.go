@@ -309,7 +309,7 @@ func (session *Session) innerInsert(bean interface{}) (int64, error) {
 		return 0, err
 	}
 
-	sqlStr, args, err := session.statement.GenInsertSQL(colNames, args)
+	buf, err := session.statement.GenInsertSQL(colNames, args)
 	if err != nil {
 		return 0, err
 	}
@@ -393,7 +393,7 @@ func (session *Session) innerInsert(bean interface{}) (int64, error) {
 		return 1, convertAssignV(*aiValue, id)
 	}
 
-	res, err := session.exec(sqlStr, args...)
+	res, err := session.exec(buf.String(), buf.Args()...)
 	if err != nil {
 		return 0, err
 	}
