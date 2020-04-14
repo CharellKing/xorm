@@ -345,13 +345,15 @@ func (session *Session) innerInsert(bean interface{}) (int64, error) {
 
 	// if there is auto increment column and driver don't support return it
 	if len(table.AutoIncrement) > 0 && !session.engine.driver.Features().SupportReturnInsertedID {
-		var sql = sqlStr
+		var sql string
 		if session.engine.dialect.URI().DBType == schemas.ORACLE {
-			_, err := session.exec(sqlStr, args...)
+			_, err := session.exec(buf.String(), args...)
 			if err != nil {
 				return 0, err
 			}
 			sql = fmt.Sprintf("select %s.currval from dual", tableName)
+		} else {
+			sql = buf.String()
 		}
 
 		rows, err := session.queryRows(sql, args...)
