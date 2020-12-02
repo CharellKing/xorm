@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"xorm.io/xorm/dialects"
 	"xorm.io/xorm/internal/utils"
 	"xorm.io/xorm/schemas"
 )
@@ -156,7 +157,7 @@ func (session *Session) innerInsertMulti(rowsSlicePtr interface{}) (int64, error
 						colNames = append(colNames, col.Name)
 						cols = append(cols, col)
 					}
-					colPlaces = append(colPlaces, fmt.Sprintf("seq_"+tableName+".nextval + %d", insertCnt))
+					colPlaces = append(colPlaces, fmt.Sprintf(dialects.OracleSeqName(tableName)+".nextval + %d", insertCnt))
 					insertCnt++
 				}
 				continue

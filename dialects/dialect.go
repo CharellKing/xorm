@@ -38,6 +38,11 @@ func (uri *URI) SetSchema(schema string) {
 	}
 }
 
+// DialectFeatures represents the features that the dialect supports
+type DialectFeatures struct {
+	SupportReturnIDWhenInsert bool
+}
+
 // Dialect represents a kind of database
 type Dialect interface {
 	Init(*URI) error

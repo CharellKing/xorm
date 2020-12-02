@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"xorm.io/builder"
+	"xorm.io/xorm/dialects"
 	"xorm.io/xorm/schemas"
 )
 
@@ -125,7 +126,7 @@ func (statement *Statement) GenInsertSQL(colNames []string, args []interface{}) 
 						return nil, err
 					}
 				}
-				if _, err := buf.WriteString("seq_" + tableName + ".nextval"); err != nil {
+				if _, err := buf.WriteString(dialects.OracleSeqName(tableName) + ".nextval"); err != nil {
 					return nil, err
 				}
 			}
@@ -146,14 +147,20 @@ func (statement *Statement) GenInsertSQL(colNames []string, args []interface{}) 
 		}
 	}
 
-	if len(table.AutoIncrement) > 0 && (statement.dialect.URI().DBType == schemas.POSTGRES ||
-		statement.dialect.URI().DBType == schemas.ORACLE) {
-		if _, err := buf.WriteString(" RETURNING "); err != nil {
-			return nil, err
-		}
-		if err := statement.dialect.Quoter().QuoteTo(buf.Builder, table.AutoIncrement); err != nil {
-			return nil, err
-		}
+	if len(table.AutoIncrement) > 0 {
+		if statement.dialect.URI().DBType == schemas.POSTGRES {
+			if _, err := buf.WriteString(" RETURNING "); err != nil {
+				return nil, err
+			}
+			if err := statement.dialect.Quoter().QuoteTo(buf.Builder, table.AutoIncrement); err != nil {
+				return nil, err
+			}
+		} /* else if statement.dialect.URI().DBType == schemas.ORACLE {
+			if _, err := buf.WriteString(fmt.Sprintf("; select %s.currval from dual",
+				dialects.OracleSeqName(tableName))); err != nil {
+				return nil, err
+			}
+		}*/
 	}
 
 	return buf, nil
