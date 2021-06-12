@@ -67,7 +67,7 @@ func (statement *Statement) GenInsertSQL(colNames []string, args []interface{}) 
 		}
 
 		if err := statement.dialect.Quoter().JoinWrite(buf.Builder, append(colNames, exprs.ColNames()...), ","); err != nil {
-			return "", nil, err
+			return nil, err
 		}
 
 		if _, err := buf.WriteString(")"); err != nil {
