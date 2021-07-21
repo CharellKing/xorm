@@ -347,7 +347,14 @@ func (session *Session) innerInsert(bean interface{}) (int64, error) {
 	// if there is auto increment column and driver don't support return it
 	if len(table.AutoIncrement) > 0 && !session.engine.driver.Features().SupportReturnInsertedID {
 		var sql string
+		var needCommit bool
 		if session.engine.dialect.URI().DBType == schemas.ORACLE {
+			if session.isAutoCommit { // if it's not in transaction
+				if err := session.Begin(); err != nil {
+					return 0, err
+				}
+				needCommit = true
+			}
 			_, err := session.exec(buf.String(), args...)
 			if err != nil {
 				return 0, err
@@ -357,11 +364,19 @@ func (session *Session) innerInsert(bean interface{}) (int64, error) {
 			sql = buf.String()
 		}
 
-		rows, err := session.queryRows(sql, args...)
+		var id int64
+		err := session.queryRow(sql, args...).Scan(&id)
 		if err != nil {
 			return 0, err
 		}
-		defer rows.Close()
+		if needCommit {
+			if err := session.Commit(); err != nil {
+				return 0, err
+			}
+		}
+		if id == 0 {
+			return 0, errors.New("insert successfully but not returned id")
+		}
 
 		defer handleAfterInsertProcessorFunc(bean)
 
@@ -376,16 +391,6 @@ func (session *Session) innerInsert(bean interface{}) (int64, error) {
 			}
 		}
 
-		var id int64
-		if !rows.Next() {
-			if rows.Err() != nil {
-				return 0, rows.Err()
-			}
-			return 0, errors.New("insert successfully but not returned id")
-		}
-		if err := rows.Scan(&id); err != nil {
-			return 1, err
-		}
 		aiValue, err := table.AutoIncrColumn().ValueOf(bean)
 		if err != nil {
 			session.engine.logger.Errorf("%v", err)
