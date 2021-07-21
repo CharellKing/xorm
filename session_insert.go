@@ -347,6 +347,7 @@ func (session *Session) innerInsert(bean interface{}) (int64, error) {
 	// if there is auto increment column and driver don't support return it
 	if len(table.AutoIncrement) > 0 && !session.engine.driver.Features().SupportReturnInsertedID {
 		var sql string
+		var newArgs []interface{}
 		var needCommit bool
 		if session.engine.dialect.URI().DBType == schemas.ORACLE {
 			if session.isAutoCommit { // if it's not in transaction
@@ -359,13 +360,14 @@ func (session *Session) innerInsert(bean interface{}) (int64, error) {
 			if err != nil {
 				return 0, err
 			}
-			sql = fmt.Sprintf("select %s.currval from dual", tableName)
+			sql = fmt.Sprintf("select %s.currval from dual", dialects.OracleSeqName(tableName))
 		} else {
 			sql = buf.String()
+			newArgs = args
 		}
 
 		var id int64
-		err := session.queryRow(sql, args...).Scan(&id)
+		err := session.queryRow(sql, newArgs...).Scan(&id)
 		if err != nil {
 			return 0, err
 		}
