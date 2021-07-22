@@ -536,7 +536,11 @@ func (session *Session) genInsertColumns(bean interface{}) ([]string, []interfac
 			// if time is non-empty, then set to auto time
 			val, t := session.engine.nowTime(col)
 			if session.engine.dialect.URI().DBType == schemas.ORACLE {
-				args = append(args, t)
+				if col.SQLType.IsNumeric() {
+					args = append(args, t.Unix())
+				} else {
+					args = append(args, t)
+				}
 			} else {
 				args = append(args, val)
 			}

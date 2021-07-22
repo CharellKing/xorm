@@ -217,7 +217,11 @@ func (session *Session) Update(bean interface{}, condiBean ...interface{}) (int6
 			col := table.UpdatedColumn()
 			val, t := session.engine.nowTime(col)
 			if session.engine.dialect.URI().DBType == schemas.ORACLE {
-				args = append(args, t)
+				if col.SQLType.IsNumeric() {
+					args = append(args, t.Unix())
+				} else {
+					args = append(args, t)
+				}
 			} else {
 				args = append(args, val)
 			}
