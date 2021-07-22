@@ -5,6 +5,7 @@
 package statements
 
 import (
+	"context"
 	"database/sql/driver"
 	"errors"
 	"fmt"
@@ -15,6 +16,7 @@ import (
 
 	"xorm.io/builder"
 	"xorm.io/xorm/contexts"
+	"xorm.io/xorm/core"
 	"xorm.io/xorm/dialects"
 	"xorm.io/xorm/internal/convert"
 	"xorm.io/xorm/internal/json"
@@ -647,11 +649,11 @@ func (statement *Statement) genColumnStr() string {
 }
 
 // GenCreateTableSQL generated create table SQL
-func (statement *Statement) GenCreateTableSQL() []string {
+func (statement *Statement) GenCreateTableSQL(queryer core.Queryer) ([]string, error) {
 	statement.RefTable.StoreEngine = statement.StoreEngine
 	statement.RefTable.Charset = statement.Charset
-	s, _ := statement.dialect.CreateTableSQL(statement.RefTable, statement.TableName())
-	return s
+	s, _, err := statement.dialect.CreateTableSQL(context.Background(), queryer, statement.RefTable, statement.TableName())
+	return s, err
 }
 
 // GenIndexSQL generated create index SQL

@@ -610,7 +610,7 @@ func (db *oracle) DropTableSQL(tableName, autoincrCol string) ([]string, bool) {
 	return sqls, false
 }
 
-func (db *oracle) CreateTableSQL(table *schemas.Table, tableName string) ([]string, bool) {
+func (db *oracle) CreateTableSQL(ctx context.Context, queryer core.Queryer, table *schemas.Table, tableName string) ([]string, bool, error) {
 	if tableName == "" {
 		tableName = table.Name
 	}
@@ -642,17 +642,22 @@ func (db *oracle) CreateTableSQL(table *schemas.Table, tableName string) ([]stri
 	}
 	b.WriteString(")")
 
+	var seqName = OracleSeqName(tableName)
 	if table.AutoIncrColumn() != nil {
+		var cnt int
+		if err := queryer.QueryRowContext(ctx, "SELECT COUNT(*) FROM user_sequences WHERE sequence_name = ?", seqName).Scan(&cnt); err != nil {
+			return nil, false, err
+		}
 		var sql2 = fmt.Sprintf(`CREATE sequence %s 
 			minvalue 1
        		nomaxvalue
        		start with 1
        		increment by 1
        		nocycle
-			nocache`, OracleSeqName(tableName))
-		return []string{b.String(), sql2}, false
+			nocache`, seqName)
+		return []string{b.String(), sql2}, false, nil
 	}
-	return []string{b.String()}, false
+	return []string{b.String()}, false, nil
 }
 
 func (db *oracle) SetQuotePolicy(quotePolicy QuotePolicy) {

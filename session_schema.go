@@ -40,7 +40,11 @@ func (session *Session) createTable(bean interface{}) error {
 		return err
 	}
 
-	sqlStrs := session.statement.GenCreateTableSQL()
+	sqlStrs, err := session.statement.GenCreateTableSQL(session.engine.db)
+	if err != nil {
+		return err
+	}
+
 	for _, s := range sqlStrs {
 		_, err := session.exec(s)
 		if err != nil {

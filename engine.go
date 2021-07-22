@@ -508,7 +508,11 @@ func (engine *Engine) dumpTables(tables []*schemas.Table, w io.Writer, tp ...sch
 			}
 		}
 
-		sqls, _ := dstDialect.CreateTableSQL(dstTable, dstTableName)
+		sqls, _, err := dstDialect.CreateTableSQL(context.Background(), engine.db, dstTable, dstTableName)
+		if err != nil {
+			return err
+		}
+
 		for _, s := range sqls {
 			_, err = io.WriteString(w, s+";\n")
 			if err != nil {

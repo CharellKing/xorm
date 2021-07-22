@@ -61,7 +61,7 @@ type Dialect interface {
 
 	GetTables(queryer core.Queryer, ctx context.Context) ([]*schemas.Table, error)
 	IsTableExist(queryer core.Queryer, ctx context.Context, tableName string) (bool, error)
-	CreateTableSQL(table *schemas.Table, tableName string) ([]string, bool)
+	CreateTableSQL(ctx context.Context, queryer core.Queryer, table *schemas.Table, tableName string) ([]string, bool, error)
 	DropTableSQL(tableName, autoincrCol string) ([]string, bool)
 
 	GetColumns(queryer core.Queryer, ctx context.Context, tableName string) ([]string, map[string]*schemas.Column, error)
@@ -271,7 +271,7 @@ func ColumnString(dialect Dialect, col *schemas.Column, includePrimaryKey bool) 
 		}
 	}
 
-	if !col.DefaultIsEmpty {
+	if col.Default != "" {
 		if _, err := bd.WriteString("DEFAULT "); err != nil {
 			return "", err
 		}
