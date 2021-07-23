@@ -285,7 +285,7 @@ func (db *sqlite3) DropIndexSQL(tableName string, index *schemas.Index) string {
 	return fmt.Sprintf("DROP INDEX %v", db.Quoter().Quote(idxName))
 }
 
-func (db *sqlite3) CreateTableSQL(table *schemas.Table, tableName string) ([]string, bool) {
+func (db *sqlite3) CreateTableSQL(ctx context.Context, queryer core.Queryer, table *schemas.Table, tableName string) ([]string, bool, error) {
 	var sql string
 	sql = "CREATE TABLE IF NOT EXISTS "
 	if tableName == "" {
@@ -317,7 +317,7 @@ func (db *sqlite3) CreateTableSQL(table *schemas.Table, tableName string) ([]str
 	}
 	sql += ")"
 
-	return []string{sql}, true
+	return []string{sql}, true, nil
 }
 
 func (db *sqlite3) ForUpdateSQL(query string) string {
