@@ -26,7 +26,7 @@ func TestCacheFind(t *testing.T) {
 	cacher := caches.NewLRUCacher2(caches.NewMemoryStore(), time.Hour, 10000)
 	testEngine.SetDefaultCacher(cacher)
 
-	assert.NoError(t, testEngine.Sync2(new(MailBox)))
+	assert.NoError(t, testEngine.Sync(new(MailBox)))
 
 	var inserts = []*MailBox{
 		{
@@ -101,7 +101,7 @@ func TestCacheFind2(t *testing.T) {
 	cacher := caches.NewLRUCacher2(caches.NewMemoryStore(), time.Hour, 10000)
 	testEngine.SetDefaultCacher(cacher)
 
-	assert.NoError(t, testEngine.Sync2(new(MailBox2)))
+	assert.NoError(t, testEngine.Sync(new(MailBox2)))
 
 	var inserts = []*MailBox2{
 		{
@@ -152,7 +152,7 @@ func TestCacheGet(t *testing.T) {
 	cacher := caches.NewLRUCacher2(caches.NewMemoryStore(), time.Hour, 10000)
 	testEngine.SetDefaultCacher(cacher)
 
-	assert.NoError(t, testEngine.Sync2(new(MailBox3)))
+	assert.NoError(t, testEngine.Sync(new(MailBox3)))
 
 	var inserts = []*MailBox3{
 		{

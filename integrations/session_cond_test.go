@@ -103,7 +103,7 @@ func TestBuilder(t *testing.T) {
 
 func TestIn(t *testing.T) {
 	assert.NoError(t, PrepareEngine())
-	assert.NoError(t, testEngine.Sync2(new(Userinfo)))
+	assert.NoError(t, testEngine.Sync(new(Userinfo)))
 
 	cnt, err := testEngine.Insert([]Userinfo{
 		{
@@ -202,7 +202,7 @@ func TestFindAndCount(t *testing.T) {
 		Name string
 	}
 
-	assert.NoError(t, testEngine.Sync2(new(FindAndCount)))
+	assert.NoError(t, testEngine.Sync(new(FindAndCount)))
 
 	_, err := testEngine.Insert([]FindAndCount{
 		{

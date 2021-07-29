@@ -86,7 +86,7 @@ type User struct {
     Updated time.Time `xorm:"updated"`
 }
 
-err := engine.Sync2(new(User))
+err := engine.Sync(new(User))
 ```
 
 * Create Engine Group
