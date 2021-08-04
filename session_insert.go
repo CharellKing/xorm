@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"xorm.io/xorm/dialects"
 	"xorm.io/xorm/internal/convert"
 	"xorm.io/xorm/internal/utils"
 	"xorm.io/xorm/schemas"
