@@ -631,7 +631,7 @@ WHERE IXS.TYPE_DESC='NONCLUSTERED' and OBJECT_NAME(IXS.OBJECT_ID) =?
 	return indexes, nil
 }
 
-func (db *mssql) CreateTableSQL(ctx context.Context, queryer core.Queryer, table *schemas.Table, tableName string) ([]string, bool, error) {
+func (db *mssql) CreateTableSQL(ctx context.Context, queryer core.Queryer, table *schemas.Table, tableName string) (string, bool, error) {
 	var sql string
 	if tableName == "" {
 		tableName = table.Name
@@ -658,8 +658,7 @@ func (db *mssql) CreateTableSQL(ctx context.Context, queryer core.Queryer, table
 	}
 
 	sql = sql[:len(sql)-2] + ")"
-	sql += ";"
-	return []string{sql}, true, nil
+	return sql, true, nil
 }
 
 func (db *mssql) ForUpdateSQL(query string) string {

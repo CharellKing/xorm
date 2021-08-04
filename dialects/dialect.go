@@ -44,7 +44,8 @@ const (
 )
 
 type DialectFeatures struct {
-	AutoincrMode int // 0 autoincrement column, 1 sequence
+	AutoincrMode    int // 0 autoincrement column, 1 sequence
+	SupportSequence bool
 }
 
 // Dialect represents a kind of database
@@ -71,8 +72,12 @@ type Dialect interface {
 
 	GetTables(queryer core.Queryer, ctx context.Context) ([]*schemas.Table, error)
 	IsTableExist(queryer core.Queryer, ctx context.Context, tableName string) (bool, error)
-	CreateTableSQL(ctx context.Context, queryer core.Queryer, table *schemas.Table, tableName string) ([]string, bool, error)
+	CreateTableSQL(ctx context.Context, queryer core.Queryer, table *schemas.Table, tableName string) (string, bool, error)
 	DropTableSQL(tableName string) (string, bool)
+
+	CreateSequenceSQL(ctx context.Context, queryer core.Queryer, seqName string) (string, error)
+	IsSequenceExist(ctx context.Context, queryer core.Queryer, seqName string) (bool, error)
+	DropSequenceSQL(seqName string) (string, error)
 
 	GetColumns(queryer core.Queryer, ctx context.Context, tableName string) ([]string, map[string]*schemas.Column, error)
 	IsColumnExist(queryer core.Queryer, ctx context.Context, tableName string, colName string) (bool, error)
@@ -111,6 +116,24 @@ func (db *Base) Init(dialect Dialect, uri *URI) error {
 // URI returns the uri of database
 func (db *Base) URI() *URI {
 	return db.uri
+}
+
+func (db *Base) CreateSequenceSQL(ctx context.Context, queryer core.Queryer, seqName string) (string, error) {
+	return fmt.Sprintf(`CREATE SEQUENCE %s 
+	minvalue 1
+	   nomaxvalue
+	   start with 1
+	   increment by 1
+	   nocycle
+	nocache`, seqName), nil
+}
+
+func (db *Base) IsSequenceExist(ctx context.Context, queryer core.Queryer, seqName string) (bool, error) {
+	return false, fmt.Errorf("unsupported sequence feature")
+}
+
+func (db *Base) DropSequenceSQL(seqName string) (string, error) {
+	return fmt.Sprintf("DROP SEQUENCE %s", seqName), nil
 }
 
 // DropTableSQL returns drop table SQL
@@ -276,7 +299,7 @@ func ColumnString(dialect Dialect, col *schemas.Column, includePrimaryKey bool) 
 		}
 	}
 
-	if col.Default != "" {
+	if !col.DefaultIsEmpty {
 		if _, err := bd.WriteString(" DEFAULT "); err != nil {
 			return "", err
 		}

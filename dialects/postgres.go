@@ -971,7 +971,7 @@ func (db *postgres) AutoIncrStr() string {
 	return ""
 }
 
-func (db *postgres) CreateTableSQL(ctx context.Context, queryer core.Queryer, table *schemas.Table, tableName string) ([]string, bool, error) {
+func (db *postgres) CreateTableSQL(ctx context.Context, queryer core.Queryer, table *schemas.Table, tableName string) (string, bool, error) {
 	var sql string
 	sql = "CREATE TABLE IF NOT EXISTS "
 	if tableName == "" {
@@ -1003,7 +1003,7 @@ func (db *postgres) CreateTableSQL(ctx context.Context, queryer core.Queryer, ta
 	}
 	sql += ")"
 
-	return []string{sql}, true, nil
+	return sql, true, nil
 }
 
 func (db *postgres) IndexCheckSQL(tableName, idxName string) (string, []interface{}) {
